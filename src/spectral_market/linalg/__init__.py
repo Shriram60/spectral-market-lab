@@ -1,6 +1,7 @@
 """From-scratch numerical linear algebra (NumPy is used only for array arithmetic)."""
 
 from .cholesky import cholesky
+from .eigen import jacobi_eigh
 from .lstsq import lstsq, lstsq_normal, lstsq_qr, lstsq_svd
 from .qr import (
     HouseholderQR,
@@ -33,6 +34,7 @@ __all__ = [
     "condition_number",
     "forward_substitution",
     "householder_qr",
+    "jacobi_eigh",
     "jacobi_svd",
     "lasso_cd",
     "lasso_kkt_violation",

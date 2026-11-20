@@ -122,14 +122,19 @@ class LassoFit:
     converged: bool
 
 
-def _soft_threshold(z: float, gamma: float) -> float:
+def _soft_threshold(z: float, gamma: float, positive: bool = False) -> float:
+    if positive:
+        return max(z - gamma, 0.0)
     return np.sign(z) * max(abs(z) - gamma, 0.0)
 
 
-def lasso_lambda_max(A: ArrayLike, b: ArrayLike, fit_intercept: bool = True) -> float:
+def lasso_lambda_max(
+    A: ArrayLike, b: ArrayLike, fit_intercept: bool = True, positive: bool = False
+) -> float:
     """Smallest lambda at which every LASSO coefficient is exactly zero."""
     Ac, bc, *_ = _prepare(A, b, fit_intercept)
-    return float(np.max(np.abs(Ac.T @ bc)) / Ac.shape[0])
+    g = Ac.T @ bc / Ac.shape[0]
+    return float(max(g.max(), 0.0) if positive else np.abs(g).max())
 
 
 def lasso_cd(
@@ -140,8 +145,14 @@ def lasso_cd(
     max_iter: int = 10_000,
     tol: float = 1e-10,
     coef_init: ArrayLike | None = None,
+    positive: bool = False,
 ) -> LassoFit:
-    """LASSO by cyclic coordinate descent with soft-thresholding."""
+    """LASSO by cyclic coordinate descent with soft-thresholding.
+
+    ``positive=True`` adds the constraint ``x >= 0`` (each 1-D update is then clipped at
+    zero), which gives long-only sparse portfolios. ``lam=0`` with ``positive=True`` is
+    non-negative least squares.
+    """
     Ac, bc, a_mean, b_mean = _prepare(A, b, fit_intercept)
     m, n = Ac.shape
     col_sq = (Ac**2).sum(axis=0) / m
@@ -158,7 +169,7 @@ def lasso_cd(
                 continue
             old = x[j]
             rho = Ac[:, j] @ r / m + col_sq[j] * old
-            new = _soft_threshold(rho, lam) / col_sq[j]
+            new = _soft_threshold(rho, lam, positive) / col_sq[j]
             if new != old:
                 r -= Ac[:, j] * (new - old)
                 x[j] = new
@@ -186,7 +197,7 @@ def lasso_path(
     ``ratio * lambda_max``.
     """
     if lambdas is None:
-        top = lasso_lambda_max(A, b, fit_intercept)
+        top = lasso_lambda_max(A, b, fit_intercept, kwargs.get("positive", False))
         lambdas = np.geomspace(top, top * ratio, n_lambdas)
     lambdas = np.sort(np.asarray(lambdas, dtype=float))[::-1]
     coefs, intercepts, warm = [], [], None
@@ -199,17 +210,26 @@ def lasso_path(
 
 
 def lasso_kkt_violation(
-    A: ArrayLike, b: ArrayLike, coef: ArrayLike, lam: float, fit_intercept: bool = True
+    A: ArrayLike,
+    b: ArrayLike,
+    coef: ArrayLike,
+    lam: float,
+    fit_intercept: bool = True,
+    positive: bool = False,
 ) -> float:
     """Largest violation of the LASSO optimality (KKT) conditions.
 
-    With ``g = A^T (b - A x) / m``: active coordinates need ``g_j = lam * sign(x_j)``
-    and inactive ones need ``|g_j| <= lam``. A value near zero certifies optimality.
+    With ``g = A^T (b - A x) / m``: active coordinates need ``g_j = lam * sign(x_j)``.
+    Inactive ones need ``|g_j| <= lam``, or ``g_j <= lam`` under ``positive``. A value
+    near zero certifies optimality.
     """
     Ac, bc, *_ = _prepare(A, b, fit_intercept)
     x = np.asarray(coef, dtype=float)
+    if positive and np.any(x < 0):
+        return float(-x.min())
     g = Ac.T @ (bc - Ac @ x) / Ac.shape[0]
     active = x != 0
     viol_active = np.abs(g[active] - lam * np.sign(x[active]))
-    viol_zero = np.maximum(np.abs(g[~active]) - lam, 0.0)
+    g_zero = g[~active] if positive else np.abs(g[~active])
+    viol_zero = np.maximum(g_zero - lam, 0.0)
     return float(max(viol_active.max(initial=0.0), viol_zero.max(initial=0.0)))

@@ -1,0 +1,75 @@
+{
+  "n_stocks": 51,
+  "n_days": 1235,
+  "q": 0.04129554655870445,
+  "top_eigenvalues": [
+    14.4893418339392,
+    3.116754164293071,
+    2.5248643624268374,
+    1.9583967287759907,
+    1.5147632813261256,
+    1.387719920611201
+  ],
+  "explained_top": [
+    0.2841047418419428,
+    0.06111282675084403,
+    0.04950714436131013
+  ],
+  "mp_edge": 1.447721660673949,
+  "mp_edge_market_adjusted": 1.0364170720091845,
+  "n_signal": 5,
+  "n_signal_market_adjusted": 9,
+  "shuffled_max_eigenvalue": 1.4503591588923497,
+  "pc1_index_correlation": 0.9567374458387771,
+  "pc1_ipr_times_n": 1.1018391166619523,
+  "loadings": {
+    "pc2": {
+      "negative": [
+        "COALINDIA",
+        "ONGC",
+        "NTPC",
+        "SBIN",
+        "BEL"
+      ],
+      "positive": [
+        "TCS",
+        "INFY",
+        "HINDUNILVR",
+        "HCLTECH",
+        "NESTLEIND"
+      ]
+    },
+    "pc3": {
+      "negative": [
+        "HCLTECH",
+        "TECHM",
+        "INFY",
+        "WIPRO",
+        "TCS"
+      ],
+      "positive": [
+        "HINDUNILVR",
+        "BRITANNIA",
+        "NESTLEIND",
+        "MARUTI",
+        "ASIANPAINT"
+      ]
+    },
+    "pc4": {
+      "negative": [
+        "ICICIBANK",
+        "HDFCBANK",
+        "BAJFINANCE",
+        "BAJAJFINSV",
+        "INFY"
+      ],
+      "positive": [
+        "CIPLA",
+        "DRREDDY",
+        "SUNPHARMA",
+        "DIVISLAB",
+        "POWERGRID"
+      ]
+    }
+  }
+}

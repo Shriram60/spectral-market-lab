@@ -1,0 +1,55 @@
+{
+  "bic": {
+    "1": -8166.165676657633,
+    "2": -8361.067745283313,
+    "3": -8338.462569540348
+  },
+  "k_selected": 2,
+  "regimes": [
+    {
+      "annual_vol": 0.09806207185313325,
+      "annual_mean": 0.25331952981023226,
+      "expected_duration_days": 40.233301337696005,
+      "stationary_share": 0.7392901266800503,
+      "viterbi_days": 951,
+      "mean_market_mode_share": 0.2644843447727051
+    },
+    {
+      "annual_vol": 0.21744784233189637,
+      "annual_mean": -0.23180658342279115,
+      "expected_duration_days": 14.1882307316863,
+      "stationary_share": 0.2607098733199496,
+      "viterbi_days": 284,
+      "mean_market_mode_share": 0.3705365132344565
+    }
+  ],
+  "transition_matrix": [
+    [
+      0.9751449678064806,
+      0.024855032193519422
+    ],
+    [
+      0.07048095135404872,
+      0.9295190486459514
+    ]
+  ],
+  "corr_lam1_turbulent_indicator": 0.5508293305463176,
+  "variance_forecast_oos_from": "2023-01-02",
+  "variance_forecast": {
+    "HMM": {
+      "qlike": -8.81980393137601,
+      "dm_stat_vs_ewma": 0.3963620961162763,
+      "dm_p_vs_ewma": 0.6919523440002237
+    },
+    "EWMA": {
+      "qlike": -8.83570113174627,
+      "dm_stat_vs_ewma": NaN,
+      "dm_p_vs_ewma": NaN
+    },
+    "21-day rolling": {
+      "qlike": -8.758978618273437,
+      "dm_stat_vs_ewma": 3.008927016461977,
+      "dm_p_vs_ewma": 0.0027108224547164957
+    }
+  }
+}

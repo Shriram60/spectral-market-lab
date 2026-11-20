@@ -3,8 +3,10 @@
 from . import (
     clustering,
     index_tracking,
+    kalman_trend,
     min_variance,
     orthogonality,
+    regimes,
     spectrum,
     stability,
     stat_arb,
@@ -20,6 +22,8 @@ MODULES = (
     index_tracking,
     min_variance,
     stat_arb,
+    kalman_trend,
+    regimes,
 )
 
 for module in MODULES:

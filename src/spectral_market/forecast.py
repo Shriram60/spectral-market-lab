@@ -58,14 +58,15 @@ class ForecastEval:
         return self.rmse_model / self.rmse_random_walk
 
 
-def diebold_mariano(e_model: ArrayLike, e_bench: ArrayLike, horizon: int) -> tuple[float, float]:
-    """Diebold-Mariano test on squared-error loss with the Harvey-Leybourne-Newbold fix.
+def loss_differential_test(d: ArrayLike, horizon: int) -> tuple[float, float]:
+    """Diebold-Mariano test that a loss differential ``d_t`` has mean zero.
 
     Overlapping h-step forecasts give MA(h-1) loss differentials, so the long-run
-    variance uses autocovariances up to lag h-1 (Bartlett weights keep it positive).
-    Returns ``(statistic, two-sided p-value)``.
+    variance uses autocovariances up to lag h-1 (Bartlett weights keep it positive), and
+    the Harvey-Leybourne-Newbold factor corrects the small-sample size.
+    Returns ``(statistic, two-sided p-value)``; negative means the first model is better.
     """
-    d = np.asarray(e_model, float) ** 2 - np.asarray(e_bench, float) ** 2
+    d = np.asarray(d, dtype=float)
     T = d.size
     dc = d - d.mean()
     lrv = dc @ dc / T
@@ -77,6 +78,12 @@ def diebold_mariano(e_model: ArrayLike, e_bench: ArrayLike, horizon: int) -> tup
     hln = np.sqrt((T + 1 - 2 * horizon + horizon * (horizon - 1) / T) / T)
     stat = float(dm * hln)
     return stat, float(2.0 * stats.t.sf(abs(stat), df=T - 1))
+
+
+def diebold_mariano(e_model: ArrayLike, e_bench: ArrayLike, horizon: int) -> tuple[float, float]:
+    """Diebold-Mariano test on squared-error loss with the Harvey-Leybourne-Newbold fix."""
+    d = np.asarray(e_model, float) ** 2 - np.asarray(e_bench, float) ** 2
+    return loss_differential_test(d, horizon)
 
 
 def walk_forward(series: ArrayLike, window: int, horizon: int, degree: int) -> ForecastEval:

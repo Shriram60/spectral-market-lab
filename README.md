@@ -375,6 +375,13 @@ Each experiment can also be run on its own, for example
 matching JSON file in `results/` holding the numbers quoted above. CI runs linting, the
 test suite and the full experiment pipeline on Python 3.10 and 3.12.
 
+### Website
+
+`site/` is a static, interactive version of these results. Open `site/index.html` in a
+browser, or serve the folder with any static host. `site/data.js` bundles the JSON results
+with the time series the charts need; regenerate it after rerunning experiments with
+`python site/build_data.py`.
+
 ## Limitations
 
 - Results cover Indian large caps over a single five-year period.

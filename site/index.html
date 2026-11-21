@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Spectral Market Lab</title>
+  <meta name="description" content="A from-scratch linear algebra library applied to 51 NSE large-cap stocks: what the structure of the market is good for, and where it fails.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%23DCF07D'/%3E%3Ccircle cx='16' cy='16' r='8' fill='none' stroke='%231E4636' stroke-width='4'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <div class="announce">
+    <p>Every number on this page is read from the repository's results files. <a href="https://github.com/Shriram60/spectral-market-lab">Check them on GitHub</a></p>
+  </div>
+
+  <header class="nav">
+    <a class="brand" href="#top" aria-label="Spectral Market Lab, back to top">
+      <svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18" fill="var(--lime)"/><circle cx="20" cy="20" r="10" fill="none" stroke="var(--forest)" stroke-width="5"/><circle cx="20" cy="20" r="3" fill="var(--forest)"/></svg>
+      <span>Spectral Market Lab</span>
+    </a>
+    <nav aria-label="Sections">
+      <a href="#numerics">Numerics</a>
+      <a href="#structure">Market structure</a>
+      <a href="#portfolios">Portfolios</a>
+      <a href="#time">Time series</a>
+      <a href="#library">Library</a>
+    </nav>
+    <a class="nav-cta" href="https://github.com/Shriram60/spectral-market-lab">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38v-1.33c-2.23.48-2.7-1.07-2.7-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.05-.49.05-.49.8.06 1.23.83 1.23.83.72 1.22 1.88.87 2.34.66.07-.52.28-.87.5-1.07-1.78-.2-3.65-.89-3.65-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.66 3.95.29.25.54.73.54 1.48v2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg>
+      Source code
+    </a>
+  </header>
+
+  <main id="main">
+    <!-- Hero -->
+    <section class="hero" id="top">
+      <div class="hero-copy">
+        <p class="kicker">51 NSE stocks, 2021 to 2025</p>
+        <h1>Most of the stock market is noise.</h1>
+        <p class="lede">A linear algebra library written from scratch, pointed at the Indian equity market. Of the 51 eigenvalues of the stocks' correlation matrix, only five rise above what pure randomness would produce. This page shows what that structure is good for, and where it fails.</p>
+        <div class="hero-actions">
+          <a class="btn btn-lime" href="#answers">See the ten answers</a>
+          <a class="btn btn-quiet" href="https://github.com/Shriram60/spectral-market-lab">Read the code</a>
+        </div>
+        <p class="proof"><span class="proof-badge" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M5 10.5 8.5 14 15 6.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>100 tests and every experiment rerun by CI on each push</p>
+      </div>
+
+      <figure class="hero-art">
+        <svg class="deco deco-triangle" viewBox="0 0 60 60" aria-hidden="true"><path d="M8 8 52 26 18 50Z" fill="none" stroke="var(--forest)" stroke-width="4" stroke-linejoin="round"/></svg>
+        <svg class="deco deco-rings" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="44" fill="none" stroke="var(--forest)" stroke-width="7" stroke-dasharray="230 50"/><circle cx="50" cy="50" r="27" fill="none" stroke="var(--forest)" stroke-width="7" stroke-dasharray="120 40"/><circle cx="50" cy="50" r="9" fill="var(--forest)"/></svg>
+        <svg class="deco deco-dash" viewBox="0 0 40 40" aria-hidden="true"><path d="M6 30 14 10M20 34 26 16M30 26 36 8" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/></svg>
+        <div class="hero-block">
+          <div class="hero-card">
+            <p class="card-title">Eigenvalues of the 51-stock correlation matrix</p>
+            <div class="chart" id="chart-hero" role="img" aria-label="Eigenvalues ranked from largest to smallest on a log scale. Five lie above the Marchenko-Pastur noise band; the largest, the market mode, is 14.5."></div>
+            <p class="card-note">Ranked largest first. The lime band is the range pure noise would fill (Marchenko-Pastur, q = N/T = 0.041).</p>
+          </div>
+        </div>
+        <div class="float-card" aria-hidden="true">
+          <p>Eigenvalues above the noise edge</p>
+          <div class="ticks" id="hero-ticks"></div>
+          <p class="float-num"><strong>5</strong> of 51</p>
+        </div>
+      </figure>
+    </section>
+
+    <!-- The ten answers -->
+    <section class="answers" id="answers" aria-labelledby="answers-h">
+      <div class="answers-head">
+        <h2 id="answers-h">Ten questions, answered out of sample</h2>
+        <p>Every method is scored on data it never saw, against a simple baseline, with a significance test. Where it doesn't beat the baseline, that's the answer.</p>
+      </div>
+      <ol class="answer-list" id="answer-list"></ol>
+    </section>
+
+    <!-- Numerics -->
+    <div class="chapter" id="numerics">
+      <header class="chapter-head">
+        <h2>Numerics</h2>
+        <p>Before the market, the machinery. The same maths can be computed in ways that differ by fifteen orders of magnitude in accuracy.</p>
+      </header>
+
+      <section class="topic" id="q-qr" aria-labelledby="q-qr-h">
+        <div class="topic-text">
+          <h3 id="q-qr-h">Does the choice of QR algorithm matter?</h3>
+          <p class="verdict-line" data-verdict="yes"></p>
+          <p>Three ways to orthogonalise the same matrix. As the matrix gets closer to singular, classical Gram-Schmidt loses orthogonality as ε·κ², modified Gram-Schmidt as ε·κ, and Householder reflections not at all.</p>
+          <dl class="facts" id="facts-qr"></dl>
+          <details><summary>How it's measured</summary><p>Matrices with prescribed condition numbers from 1 to 10¹³ are built from random orthogonal factors. Each algorithm's Q is checked with ‖I − QᵀQ‖₂, which is zero for a perfectly orthogonal matrix.</p></details>
+        </div>
+        <figure class="panel">
+          <figcaption><span class="panel-title">Loss of orthogonality vs condition number</span><span class="legend" id="legend-qr"></span></figcaption>
+          <div class="chart" id="chart-qr" role="img" aria-label="Log-log line chart of loss of orthogonality against condition number for three QR algorithms."></div>
+          <p class="source">results/orthogonality.json</p>
+        </figure>
+      </section>
+
+      <section class="topic flip" id="q-solvers" aria-labelledby="q-solvers-h">
+        <div class="topic-text">
+          <h3 id="q-solvers-h">Is the normal-equations shortcut safe?</h3>
+          <p class="verdict-line" data-verdict="no"></p>
+          <p>Fitting a trend through day numbers 1, 2, 3… builds a badly conditioned matrix. The normal equations square that condition number and lose accuracy first. Rescaling time to [−1, 1] fixes every solver at once.</p>
+          <dl class="facts" id="facts-solvers"></dl>
+          <details><summary>How it's measured</summary><p>Polynomial trends with known coefficients are fitted over 250 trading days by the normal equations (Cholesky), Householder QR and a truncated SVD. The chart shows the relative error in the recovered coefficients. Gaps mean the solver broke down.</p></details>
+        </div>
+        <figure class="panel">
+          <figcaption><span class="panel-title">Coefficient error by polynomial degree</span>
+            <span class="seg" role="group" aria-label="Time axis">
+              <button type="button" aria-pressed="true" data-scale="raw">Raw day numbers</button>
+              <button type="button" aria-pressed="false" data-scale="scaled">Rescaled time</button>
+            </span>
+          </figcaption>
+          <span class="legend" id="legend-solvers"></span>
+          <div class="chart" id="chart-solvers" role="img" aria-label="Line chart of relative coefficient error against polynomial degree for three least-squares solvers."></div>
+          <p class="source">results/stability.json</p>
+        </figure>
+      </section>
+
+      <section class="topic" id="q-trend" aria-labelledby="q-trend-h">
+        <div class="topic-text">
+          <h3 id="q-trend-h">Does a fitted price trend predict prices?</h3>
+          <p class="verdict-line" data-verdict="no"></p>
+          <p>This is where the project started: a straight line through eight days of prices. Across 210 walk-forward setups and 239,904 forecasts, no trend model beats simply predicting tomorrow's price is today's.</p>
+          <dl class="facts" id="facts-trend"></dl>
+          <details><summary>How it's measured</summary><p>Seven series (MUTHOOTFIN, NIFTY 50, RELIANCE, TCS, HDFCBANK, INFY, ITC) are forecast with rolling windows of 8 to 250 days, polynomial degrees 0 to 2 and horizons of 1 and 5 days. Each setup is compared with the random walk by a Diebold-Mariano test. Rolling forecasts are a fixed linear filter derived once from a Householder QR.</p></details>
+        </div>
+        <figure class="panel">
+          <figcaption><span class="panel-title">Forecast error relative to a random walk</span>
+            <span class="seg" role="group" aria-label="Forecast horizon">
+              <button type="button" aria-pressed="true" data-h="1">1 day ahead</button>
+              <button type="button" aria-pressed="false" data-h="5">5 days ahead</button>
+            </span>
+          </figcaption>
+          <span class="legend" id="legend-trend"></span>
+          <div class="chart" id="chart-trend" role="img" aria-label="Dot plot of median RMSE ratio to the random walk by window length and polynomial degree. Every dot is above 1."></div>
+          <p class="source">results/trend_report.json. Median over 7 series; above 1 means worse than the random walk.</p>
+        </figure>
+      </section>
+    </div>
+
+    <!-- Market structure -->
+    <div class="chapter" id="structure">
+      <header class="chapter-head">
+        <h2>Market structure</h2>
+        <p>Price paths don't forecast, but how stocks move together has a clear shape. Random matrix theory separates that shape from noise.</p>
+      </header>
+
+      <section class="topic flip" id="q-spectrum" aria-labelledby="q-spectrum-h">
+        <div class="topic-text">
+          <h3 id="q-spectrum-h">Is there structure beyond noise?</h3>
+          <p class="verdict-line" data-verdict="yes"></p>
+          <p>One eigenvalue, the market mode, explains 28.4% of all variance and moves with the NIFTY 50 almost exactly. The next few are sector bets. Everything else sits in the band pure noise would produce.</p>
+          <dl class="facts" id="facts-spectrum"></dl>
+          <details><summary>How it's measured</summary><p>PCA comes from the SVD of the standardised returns matrix (1,235 days × 51 stocks), never forming the correlation matrix explicitly. Independent series would put every eigenvalue inside the Marchenko-Pastur interval [(1 − √q)², (1 + √q)²]. Shuffling each stock's returns in time, which keeps fat tails but destroys co-movement, gives a largest eigenvalue of 1.45, matching the analytic edge.</p></details>
+        </div>
+        <figure class="panel">
+          <figcaption><span class="panel-title">What the eigenportfolios after the market mode bet on</span></figcaption>
+          <div class="loadings" id="loadings"></div>
+          <p class="source">results/spectrum.json. The five stocks with the most negative and most positive loadings.</p>
+        </figure>
+      </section>
+
+      <section class="topic" id="q-clusters" aria-labelledby="q-clusters-h">
+        <div class="topic-text">
+          <h3 id="q-clusters-h">Can sectors be found without labels?</h3>
+          <p class="verdict-line" data-verdict="yes"></p>
+          <p>Treat stocks as nodes of a graph linked by correlation and cut it along its weakest seams. With the market mode projected out, the cuts land almost exactly on NSE's own sectors. Leave it in and there's only one cluster: the market.</p>
+          <dl class="facts" id="facts-clusters"></dl>
+          <details><summary>How it's measured</summary><p>The low eigenvectors of the normalised Laplacian L = I − D⁻¹ᐟ²WD⁻¹ᐟ² embed the stocks and k-means groups them; the number of clusters comes from the largest eigengap. Sector labels are used only to score the result with the adjusted Rand index, against 2,000 random relabellings.</p></details>
+        </div>
+        <figure class="panel">
+          <figcaption><span class="panel-title">Agreement with NSE sectors by number of clusters</span><span class="legend" id="legend-clusters"></span></figcaption>
+          <div class="chart" id="chart-clusters" role="img" aria-label="Line chart of adjusted Rand index against number of clusters, with and without removing the market mode, above a chance band."></div>
+          <p class="source">results/clustering.json</p>
+        </figure>
+      </section>
+
+      <div class="cluster-grid-wrap">
+        <h4>The 11 clusters it found</h4>
+        <p class="sub">Bars show the share of each cluster that belongs to its most common sector.</p>
+        <ul class="cluster-grid" id="cluster-grid"></ul>
+      </div>
+    </div>
+
+    <!-- Portfolios -->
+    <div class="chapter" id="portfolios">
+      <header class="chapter-head">
+        <h2>Portfolios</h2>
+        <p>Three practical uses of that structure, each held out of sample: copying an index cheaply, lowering risk, and trading what the factors leave behind.</p>
+      </header>
+
+      <section class="topic flip" id="q-tracking" aria-labelledby="q-tracking-h">
+        <div class="topic-text">
+          <h3 id="q-tracking-h">Can ten stocks track the NIFTY 50?</h3>
+          <p class="verdict-line" data-verdict="yes"></p>
+          <p>Baskets picked on 2021–2023 and held untouched through 2024–2025. A greedily chosen ten-stock basket tracks the index with 3.9% annual error, better than every one of 200 random ten-stock baskets.</p>
+          <dl class="facts" id="facts-tracking"></dl>
+          <details><summary>How it's measured</summary><p>Weights solve min ‖r_index − Rw‖² over long-only, fully invested portfolios, a quadratic program on the probability simplex solved exactly by an active-set method. An L1 penalty can't make that sparse (‖w‖₁ is always 1), so stocks are selected first, either by the order they enter a LASSO path or greedily, and then weighted. Random baskets get the same weighting, so the comparison isolates selection.</p></details>
+        </div>
+        <figure class="panel">
+          <figcaption><span class="panel-title">Out-of-sample tracking error by basket size, 2024–2025</span><span class="legend" id="legend-tracking"></span></figcaption>
+          <div class="chart" id="chart-tracking" role="img" aria-label="Line chart of out-of-sample tracking error against number of stocks for greedy and LASSO selection, with the median random basket."></div>
+          <p class="source">results/index_tracking.json</p>
+        </figure>
+      </section>
+
+      <div class="basket" id="basket"></div>
+
+      <section class="topic" id="q-minvar" aria-labelledby="q-minvar-h">
+        <div class="topic-text">
+          <h3 id="q-minvar-h">Does cleaning the covariance matrix lower risk?</h3>
+          <p class="verdict-line" data-verdict="partly"></p>
+          <p>A minimum-variance optimiser hunts for the directions where the sample covariance underestimates risk, so it buys noise. With little data, cleaning the estimate cuts realised volatility by over a quarter. With two years of data, or a no-shorting rule, the gain is gone.</p>
+          <dl class="facts" id="facts-minvar"></dl>
+          <details><summary>How it's measured</summary><p>Four estimators feed the same optimiser: the sample covariance, Ledoit-Wolf shrinkage, RMT eigenvalue clipping and a PCA factor model. Weights come from the KKT system via one Cholesky factorisation (or the simplex QP when long-only), rebalanced every 21 days and scored on 2023-01-13 to 2025-12-31. Differences use a Diebold-Mariano test on squared daily returns.</p></details>
+        </div>
+        <figure class="panel">
+          <figcaption><span class="panel-title">Realised volatility of the minimum-variance portfolio</span>
+            <span class="seg" role="group" aria-label="Constraint">
+              <button type="button" aria-pressed="true" data-c="unconstrained">Shorting allowed</button>
+              <button type="button" aria-pressed="false" data-c="long_only">Long only</button>
+            </span>
+          </figcaption>
+          <span class="legend" id="legend-minvar"></span>
+          <div class="chart" id="chart-minvar" role="img" aria-label="Line chart of out-of-sample volatility against estimation window for four covariance estimators."></div>
+          <p class="source">results/min_variance.json. Annualised, 2023–2025.</p>
+        </figure>
+      </section>
+
+      <section class="topic flip" id="q-statarb" aria-labelledby="q-statarb-h">
+        <div class="topic-text">
+          <h3 id="q-statarb-h">Is there a stat-arb edge after costs?</h3>
+          <p class="verdict-line" data-verdict="no"></p>
+          <p>Strip each stock of its factor exposure and bet that what's left reverts. On US stocks in 1997–2007 this made money. Here it roughly breaks even before costs and loses steadily after them.</p>
+          <dl class="facts" id="facts-statarb"></dl>
+          <details><summary>How it's measured</summary><p>This is Avellaneda and Lee (2010) with the paper's own parameters, so nothing is tuned on this data. Residuals of a regression on the eigenportfolios are fitted as an Ornstein-Uhlenbeck process; positions open when the s-score passes 1.25 and close at 0.75 or 0.5, each hedged with its factor exposure. Costs are charged one-way on every unit traded, stock legs and hedges alike.</p></details>
+        </div>
+        <figure class="panel">
+          <figcaption><span class="panel-title">Growth of ₹1, 2022–2025</span>
+            <span class="seg" role="group" aria-label="Trading cost per unit traded">
+              <button type="button" aria-pressed="true" data-cost="0">No costs</button>
+              <button type="button" aria-pressed="false" data-cost="2">2 bps</button>
+              <button type="button" aria-pressed="false" data-cost="5">5 bps</button>
+              <button type="button" aria-pressed="false" data-cost="10">10 bps</button>
+            </span>
+          </figcaption>
+          <span class="legend" id="legend-statarb"></span>
+          <div class="chart" id="chart-statarb" role="img" aria-label="Line chart of the stat-arb strategy's growth of one rupee against NIFTY 50 buy and hold."></div>
+          <p class="source">Strategy run from cached data; summary in results/stat_arb.json</p>
+        </figure>
+      </section>
+    </div>
+
+    <!-- Time series -->
+    <div class="chapter" id="time">
+      <header class="chapter-head">
+        <h2>Time series</h2>
+        <p>Back to the original question with better tools: a trend that's allowed to change, and a market that's allowed to switch moods.</p>
+      </header>
+
+      <section class="topic" id="q-kalman" aria-labelledby="q-kalman-h">
+        <div class="topic-text">
+          <h3 id="q-kalman-h">Does a time-varying trend forecast better?</h3>
+          <p class="verdict-line" data-verdict="no"></p>
+          <p>A Kalman filter lets the trend's level and slope drift. The data prefers a slope that barely moves, and forecasts land within 1% of the random walk on all seven series. Forcing the trend to chase recent prices only makes the estimate noisier.</p>
+          <dl class="facts" id="facts-kalman"></dl>
+          <details><summary>How it's measured</summary><p>A local linear trend model is fitted by maximum likelihood, with the slope's signal-to-noise ratio profiled over a grid from 10⁻⁸ to 10⁻². A likelihood-ratio test rejects every ratio of 10⁻⁴ or more on all seven series. Forecasts are fitted on 2021–2022 and filtered causally through 2023–2025.</p></details>
+        </div>
+        <figure class="panel">
+          <figcaption><span class="panel-title">NIFTY 50 trend slope, annualised, with 95% band</span><span class="legend" id="legend-kalman"></span></figcaption>
+          <div class="chart" id="chart-kalman" role="img" aria-label="Line chart of the NIFTY 50 filtered trend slope under the fitted model and a trend-following model, with uncertainty bands."></div>
+          <div class="chart chart-short" id="chart-kalman-oos" role="img" aria-label="Dot plot of 5-day forecast RMSE relative to the random walk for seven series, all close to 1."></div>
+          <p class="source">Filter run from cached data; summary in results/kalman_trend.json</p>
+        </figure>
+      </section>
+
+      <section class="topic flip" id="q-regimes" aria-labelledby="q-regimes-h">
+        <div class="topic-text">
+          <h3 id="q-regimes-h">Does the market switch between regimes?</h3>
+          <p class="verdict-line" data-verdict="yes"></p>
+          <p>A hidden Markov model finds two: a calm regime most of the time and a turbulent one in short bursts. In the turbulent regime stocks move together far more, which is exactly when diversification is needed most. As a volatility forecaster, though, it only ties with a simple moving average.</p>
+          <dl class="facts" id="facts-regimes"></dl>
+          <details><summary>How it's measured</summary><p>A Gaussian HMM of daily NIFTY 50 returns is fitted with Baum-Welch using scaled forward-backward recursions; BIC picks two states over one or three. The lower panel is the market mode's share of a rolling 63-day correlation matrix. Forecasts use only filtered probabilities, so nothing looks ahead.</p></details>
+        </div>
+        <figure class="panel">
+          <figcaption><span class="panel-title">NIFTY 50 and the turbulent regime</span><span class="legend" id="legend-regimes"></span></figcaption>
+          <div class="chart" id="chart-regimes" role="img" aria-label="NIFTY 50 growth line with turbulent periods shaded."></div>
+          <p class="panel-sub">Share of variance in the market mode, λ₁ / N</p>
+          <div class="chart chart-short" id="chart-lam1" role="img" aria-label="Line chart of the market-mode share over time, higher during turbulent periods."></div>
+          <p class="source">Model run from cached data; summary in results/regimes.json</p>
+        </figure>
+      </section>
+    </div>
+
+    <!-- Library -->
+    <section class="library" id="library" aria-labelledby="library-h">
+      <div class="library-head">
+        <h2 id="library-h">The library underneath</h2>
+        <p>Every factorisation, eigensolver and optimiser is written by hand and tested against NumPy, SciPy or scikit-learn. NumPy does the array arithmetic; SciPy is used only for distributions and one likelihood maximisation.</p>
+        <pre class="code"><code>pip install -e ".[dev]"
+pytest
+python -m spectral_market.experiments</code></pre>
+        <p class="sub">Prices are cached in the repository, so every number reproduces offline.</p>
+      </div>
+      <div class="table-wrap">
+        <table class="modules">
+          <caption class="visually-hidden">Library modules</caption>
+          <thead><tr><th scope="col">Module</th><th scope="col">What's in it</th></tr></thead>
+          <tbody>
+            <tr><td><code>linalg/qr.py</code></td><td>Classical and modified Gram-Schmidt, Householder QR</td></tr>
+            <tr><td><code>linalg/svd.py</code></td><td>One-sided Jacobi SVD with QR preconditioning</td></tr>
+            <tr><td><code>linalg/eigen.py</code></td><td>Symmetric eigendecomposition by cyclic Jacobi rotations</td></tr>
+            <tr><td><code>linalg/cholesky.py</code></td><td>Cholesky with positive-definiteness detection</td></tr>
+            <tr><td><code>linalg/lstsq.py</code></td><td>Least squares by normal equations, QR and SVD</td></tr>
+            <tr><td><code>linalg/regularized.py</code></td><td>Ridge with GCV, LASSO by coordinate descent</td></tr>
+            <tr><td><code>optimize.py</code></td><td>Exact active-set QP on the probability simplex</td></tr>
+            <tr><td><code>spectral.py</code></td><td>PCA, Marchenko-Pastur, Laplacian, k-means++, adjusted Rand index</td></tr>
+            <tr><td><code>covariance.py</code></td><td>Sample, Ledoit-Wolf, RMT-clipped and factor covariance</td></tr>
+            <tr><td><code>portfolio.py</code></td><td>Minimum-variance weights and rolling backtests</td></tr>
+            <tr><td><code>tracking.py</code></td><td>Sparse index tracking paths and random baskets</td></tr>
+            <tr><td><code>statarb.py</code></td><td>Ornstein-Uhlenbeck fits, s-scores, hedged backtest</td></tr>
+            <tr><td><code>kalman.py</code></td><td>Kalman filter, RTS smoother, likelihood fitting</td></tr>
+            <tr><td><code>hmm.py</code></td><td>Baum-Welch, Viterbi, BIC, variance forecasts</td></tr>
+            <tr><td><code>forecast.py</code></td><td>Walk-forward evaluation, Diebold-Mariano test</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <div>
+      <p class="foot-brand">Spectral Market Lab</p>
+      <p>Prices: split- and dividend-adjusted daily closes from Yahoo Finance, 2021-01-01 to 2025-12-31. The universe uses today's index members over a past window, so results carry survivorship bias. Nothing here is investment advice.</p>
+    </div>
+    <p class="foot-origin">Started as a course project for Linear Algebra and Its Applications, PES University, 2024–25. <a href="https://github.com/Shriram60/spectral-market-lab">github.com/Shriram60/spectral-market-lab</a></p>
+  </footer>
+
+  <div class="tip" id="tip" role="status" aria-live="polite" hidden></div>
+
+  <script src="data.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

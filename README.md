@@ -12,6 +12,8 @@ The project asks what linear algebra can and cannot tell you about a market, and
 scores every answer out of sample against a simple baseline with a significance test.
 Where a method does not beat its baseline, that is reported as the result.
 
+![The project website, showing the 51 eigenvalues of the stock correlation matrix with only five above the band that pure noise would fill](docs/screenshots/home.png)
+
 ## Key results
 
 | Question | Answer |
@@ -29,6 +31,7 @@ Where a method does not beat its baseline, that is reported as the result.
 
 ## Contents
 
+- [Website](#website)
 - [Numerical foundations](#numerical-foundations)
 - [Trend fitting and forecasting](#trend-fitting-and-forecasting)
 - [Spectral structure of the market](#spectral-structure-of-the-market)
@@ -42,6 +45,67 @@ Where a method does not beat its baseline, that is reported as the result.
 - [Data](#data)
 - [Reproducing](#reproducing)
 - [Limitations](#limitations)
+
+## Website
+
+`site/` is an interactive version of these results: the ten questions with their answers,
+and for each one a short explanation, the key numbers and a chart you can hover over and
+switch between settings. It is plain HTML, CSS and JavaScript with no build step. d3 and
+the two fonts are bundled in `site/vendor/`, so the page makes no requests to other sites
+and also works offline.
+
+### Screenshots
+
+<table>
+  <tr>
+    <td width="50%"><strong>The ten questions</strong><br><img src="docs/screenshots/answers.png" alt="Ten questions, each with a one-line answer and a yes, no or partly tag"></td>
+    <td width="50%"><strong>Structure beyond noise</strong><br><img src="docs/screenshots/spectrum.png" alt="The stocks with the most negative and most positive loadings on principal components 2 to 4"></td>
+  </tr>
+  <tr>
+    <td><strong>Sector discovery</strong><br><img src="docs/screenshots/clusters.png" alt="Adjusted Rand index by number of clusters, with the market mode removed and left in"></td>
+    <td><strong>Index tracking</strong><br><img src="docs/screenshots/tracking.png" alt="Tracking error against basket size for greedy selection, LASSO and random baskets"></td>
+  </tr>
+  <tr>
+    <td><strong>Statistical arbitrage</strong><br><img src="docs/screenshots/statarb.png" alt="Growth of one rupee for the strategy and the NIFTY 50, with a trading cost switch"></td>
+    <td><strong>Market regimes</strong><br><img src="docs/screenshots/regimes.png" alt="The NIFTY 50 with turbulent periods shaded, above the market mode's share of variance"></td>
+  </tr>
+  <tr>
+    <td><strong>Least-squares solvers</strong><br><img src="docs/screenshots/solvers.png" alt="Error of each least-squares solver against polynomial degree on a log scale"></td>
+    <td><strong>On a phone</strong><br><img src="docs/screenshots/phone.png" alt="The home page, the structure section and the statistical arbitrage section at phone size"></td>
+  </tr>
+</table>
+
+### View it locally
+
+Open `site/index.html` in a browser, or serve the folder:
+
+```bash
+python -m http.server 8000 --directory site
+```
+
+and go to <http://localhost:8000>.
+
+### Deploy
+
+Any static host can serve `site/` as it is. There is no build command, and the publish
+directory is `site`.
+
+| Host | Setting |
+|---|---|
+| Netlify, Cloudflare Pages or Vercel | Import the repository, leave the build command empty and set the output directory to `site` |
+| GitHub Pages | Under Settings → Pages choose GitHub Actions, then add a workflow that runs `actions/upload-pages-artifact` with `path: site` followed by `actions/deploy-pages` |
+
+### Updating the data
+
+`site/data.js` holds the JSON results from `results/` together with the time series the
+charts need. After rerunning the experiments, rebuild it with:
+
+```bash
+python site/build_data.py
+```
+
+This reruns the spectrum, statistical arbitrage, Kalman and regime experiments from the
+cached data and takes a few minutes.
 
 ## Numerical foundations
 
@@ -374,13 +438,6 @@ Each experiment can also be run on its own, for example
 `python -m spectral_market.experiments.min_variance`. Every figure in `figures/` has a
 matching JSON file in `results/` holding the numbers quoted above. CI runs linting, the
 test suite and the full experiment pipeline on Python 3.10 and 3.12.
-
-### Website
-
-`site/` is a static, interactive version of these results. Open `site/index.html` in a
-browser, or serve the folder with any static host. `site/data.js` bundles the JSON results
-with the time series the charts need; regenerate it after rerunning experiments with
-`python site/build_data.py`.
 
 ## Limitations
 
